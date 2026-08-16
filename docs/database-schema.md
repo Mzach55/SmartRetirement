@@ -3,6 +3,9 @@
 This diagram reflects the current EF Core entity model and Fluent API
 configuration in `SmartRetirement.Api`.
 
+For request flow, dependency injection, repository behavior, and service
+business rules, see [Application Flow](application-flow.md).
+
 ```mermaid
 erDiagram
     PARTICIPANT ||--o{ PLAN : owns
