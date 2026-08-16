@@ -13,6 +13,9 @@
 *.sqlite
 *.sqlite3
 
+# Local learning materials
+docs/topics-1-2-quiz.md
+
 # User-specific files
 *.rsuser
 *.suo
