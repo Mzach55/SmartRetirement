@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SmartRetirement.Api.Data;
+using SmartRetirement.Api.Repositories.Implementations;
+using SmartRetirement.Api.Repositories.Interfaces;
+using SmartRetirement.Api.Services.Implementations;
+using SmartRetirement.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +16,19 @@ builder.Services.AddOpenApi();
 // grab value from apsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Dependancy Injection
-builder.Services.AddDbContext<AppDbContext>(Options => Options.UseSqlite(connectionString));
+// Dependency injection
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
+builder.Services.AddScoped<IEmployerRepository, EmployerRepository>();
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<IContributionRepository, ContributionRepository>();
+
+builder.Services.AddScoped<IParticipantService, ParticipantService>();
+builder.Services.AddScoped<IPlanService, PlanService>();
+builder.Services.AddScoped<IContributionService, ContributionService>();
 
 var app = builder.Build();
 
