@@ -1,3 +1,4 @@
+using SmartRetirement.Api.DTOs.Employers;
 using SmartRetirement.Api.Models;
 
 namespace SmartRetirement.Api.DTOs.Plans;
@@ -11,5 +12,6 @@ public sealed record PlanResponse(
     DateOnly OpenedOn,
     decimal CurrentBalance,
     decimal AnnualContributionLimit,
-    bool IsActive
+    bool IsActive,
+    EmployerSummaryResponse? Employer
 );

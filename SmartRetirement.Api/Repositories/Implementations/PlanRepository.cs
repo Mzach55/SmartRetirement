@@ -11,6 +11,15 @@ public class PlanRepository : Repository<Plan>, IPlanRepository
     {
     }
 
+    public async Task<IReadOnlyList<Plan>> GetAllWithEmployerAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(plan => plan.Employer)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Plan?> GetWithDetailsAsync(
         int planId,
         CancellationToken cancellationToken = default)
@@ -31,6 +40,7 @@ public class PlanRepository : Repository<Plan>, IPlanRepository
     {
         return await _dbSet
             .AsNoTracking()
+            .Include(plan => plan.Employer)
             .Where(plan => plan.ParticipantId == participantId)
             .ToListAsync(cancellationToken);
     }
@@ -41,6 +51,7 @@ public class PlanRepository : Repository<Plan>, IPlanRepository
     {
         return await _dbSet
             .AsNoTracking()
+            .Include(plan => plan.Employer)
             .Where(plan => plan.EmployerId == employerId)
             .ToListAsync(cancellationToken);
     }

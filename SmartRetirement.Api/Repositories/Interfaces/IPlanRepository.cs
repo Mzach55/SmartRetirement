@@ -4,6 +4,10 @@ namespace SmartRetirement.Api.Repositories.Interfaces;
 
 public interface IPlanRepository : IRepository<Plan>
 {
+    // Returns every plan with its optional employer for response mapping.
+    Task<IReadOnlyList<Plan>> GetAllWithEmployerAsync(
+        CancellationToken cancellationToken = default);
+
     // Returns one plan together with its participant, optional employer,
     // and contribution history. Returns null when the plan does not exist.
     Task<Plan?> GetWithDetailsAsync(

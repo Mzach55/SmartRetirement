@@ -1,4 +1,5 @@
 using SmartRetirement.Api.DTOs.Common;
+using SmartRetirement.Api.DTOs.Employers;
 using SmartRetirement.Api.DTOs.Plans;
 using SmartRetirement.Api.Models;
 using SmartRetirement.Api.Repositories.Interfaces;
@@ -25,7 +26,8 @@ public sealed class PlanService : IPlanService
     public async Task<ServiceResult<IReadOnlyList<PlanResponse>>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        var plans = await _planRepository.GetAllAsync(cancellationToken);
+        var plans = await _planRepository.GetAllWithEmployerAsync(
+            cancellationToken);
 
         var response = plans
             .Select(MapToResponse)
@@ -45,7 +47,7 @@ public sealed class PlanService : IPlanService
                 "Plan ID must be greater than zero.");
         }
 
-        var plan = await _planRepository.GetByIdAsync(
+        var plan = await _planRepository.GetWithDetailsAsync(
             planId,
             cancellationToken);
 
@@ -169,9 +171,11 @@ public sealed class PlanService : IPlanService
                 $"Participant {request.ParticipantId} was not found.");
         }
 
+        Employer? employer = null;
+
         if (request.EmployerId is int employerId)
         {
-            var employer = await _employerRepository.GetByIdAsync(
+            employer = await _employerRepository.GetByIdAsync(
                 employerId,
                 cancellationToken);
 
@@ -192,7 +196,8 @@ public sealed class PlanService : IPlanService
             OpenedOn = request.OpenedOn,
             CurrentBalance = 0,
             AnnualContributionLimit = request.AnnualContributionLimit,
-            IsActive = true
+            IsActive = true,
+            Employer = employer
         };
 
         await _planRepository.AddAsync(plan, cancellationToken);
@@ -246,9 +251,11 @@ public sealed class PlanService : IPlanService
                 $"Plan {planId} was not found.");
         }
 
+        Employer? employer = null;
+
         if (request.EmployerId is int employerId)
         {
-            var employer = await _employerRepository.GetByIdAsync(
+            employer = await _employerRepository.GetByIdAsync(
                 employerId,
                 cancellationToken);
 
@@ -266,6 +273,7 @@ public sealed class PlanService : IPlanService
         plan.OpenedOn = request.OpenedOn;
         plan.AnnualContributionLimit = request.AnnualContributionLimit;
         plan.IsActive = request.IsActive;
+        plan.Employer = employer;
 
         _planRepository.Update(plan);
         await _planRepository.SaveChangesAsync(cancellationToken);
@@ -372,6 +380,12 @@ public sealed class PlanService : IPlanService
             plan.OpenedOn,
             plan.CurrentBalance,
             plan.AnnualContributionLimit,
-            plan.IsActive);
+            plan.IsActive,
+            plan.Employer is null
+                ? null
+                : new EmployerSummaryResponse(
+                    plan.Employer.Id,
+                    plan.Employer.Name,
+                    plan.Employer.Industry));
     }
 }
