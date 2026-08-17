@@ -39,6 +39,11 @@ app.UseStatusCodePages();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    await DevelopmentDataSeeder.SeedAsync(dbContext);
+
     app.MapOpenApi();
 }
 
