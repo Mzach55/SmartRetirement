@@ -1,75 +1,109 @@
-# React + TypeScript + Vite
+# RetireWise Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The RetireWise client is a React and TypeScript participant portal backed by
+`SmartRetirement.Api`. It includes participant selection, dashboards, plan
+details, contribution entry, and profile editing.
 
-Currently, two official plugins are available:
+See the [root README](../README.md) for the product overview and the
+[API README](../SmartRetirement.Api/README.md) for backend details.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Client architecture
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+Route page
+  → feature query or mutation hook
+  → typed API function and runtime response parser
+  → ASP.NET Core API
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- React Router owns participant and plan identity through URL parameters.
+- TanStack Query owns API data, caching, retries, and mutation refreshes.
+- Form components own unsaved input.
+- Pure helpers calculate balances and contribution capacity.
+- Shared UI components provide consistent feedback and accessibility behavior.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Run locally
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Start the API at `http://localhost:5045`, then run:
 
+```bash
+npm ci
+npm run dev
 ```
+
+Open the URL printed by Vite, normally `http://localhost:5173`.
+
+Vite forwards relative `/api` requests to the local API. Machine-specific
+overrides can be placed in `.env.local` using `.env.example` as a template:
+
+```text
+VITE_API_BASE_URL=
+DEV_API_TARGET=http://localhost:5045
+```
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Type-check and build the client |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run frontend tests once |
+| `npm run test:watch` | Run tests while editing |
+| `npm run check` | Run lint, tests, type-checking, and build |
+
+## Routes
+
+| Route | Page |
+| --- | --- |
+| `/` | Demo participant chooser |
+| `/participants/:participantId` | Dashboard |
+| `/participants/:participantId/plans` | Plan list |
+| `/participants/:participantId/plans/:planId` | Plan details and history |
+| `/participants/:participantId/plans/:planId/contribute` | Contribution form |
+| `/participants/:participantId/profile` | Participant profile |
+
+Route IDs are validated, and a plan is displayed only when it belongs to the
+participant identified by the URL.
+
+## Source structure
+
+```text
+src/api/            Typed HTTP functions, errors, and runtime parsers
+src/app/            Providers, routes, navigation effects, error boundary
+src/components/     Shared layout and UI components
+src/features/       Participant, plan, contribution, and dashboard features
+src/lib/            Financial, formatting, and route helpers
+src/query/          Query client policy and key factories
+src/routes/         Page-level data and navigation orchestration
+src/test/           Shared test setup and fixtures
+src/types/          API contracts
+```
+
+## Important behavior
+
+The contribution preview is advisory. The API performs the final annual-limit
+check, and a rejected request preserves the user's draft. Successful
+contributions refresh the plan, history, and dashboard data. Successful profile
+updates refresh both the participant shell and chooser.
+
+Expected API failures remain page state with retry or correction options.
+Unexpected rendering failures are handled by the application error boundary.
+
+## Testing
+
+The Vitest and Testing Library suite covers financial calculations, route
+parsing, runtime API contracts, form validation, user interactions, pending
+states, and unexpected-error recovery.
+
+Run the complete client quality gate before committing:
+
+```bash
+npm run check
+```
+
+Detailed design and learning notes remain under [`docs/client`](../docs/client/),
+including the [state inventory](../docs/client/state-inventory.md),
+[server-state guide](../docs/client/server-state.md), and
+[demo guide](../docs/client/demo-readiness.md).
