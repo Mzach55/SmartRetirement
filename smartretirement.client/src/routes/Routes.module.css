@@ -1,0 +1,655 @@
+.page {
+  width: min(78rem, 100%);
+  margin: 0 auto;
+  padding: clamp(var(--space-6), 5vw, var(--space-9));
+}
+
+.pageNarrow {
+  width: min(58rem, 100%);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.inlineAction {
+  margin-block-start: var(--space-3);
+}
+
+.pageNotice {
+  margin-block-end: var(--space-6);
+}
+
+.routeGate {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: var(--space-5);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(31, 157, 119, 0.12), transparent 24rem),
+    var(--color-app-background);
+}
+
+.routeGateCard {
+  display: grid;
+  justify-items: center;
+  width: min(30rem, 100%);
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.routeGateMark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-block-end: var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-on-brand);
+  background: var(--color-sidebar);
+  font-weight: 900;
+}
+
+.backLink {
+  display: inline-flex;
+  margin-block-end: var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--color-brand-strong);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.statLabel {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.statValue {
+  margin: var(--space-4) 0 var(--space-3);
+  color: var(--color-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: 820;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.statHint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-block-end: var(--space-5);
+}
+
+.sectionHeading h2,
+.sectionHeading p {
+  margin: 0;
+}
+
+.sectionHeading h2 {
+  color: var(--color-heading);
+  font-size: var(--font-size-lg);
+}
+
+.sectionHeading p {
+  margin-block-start: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.accountPreviewList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.accountPreview {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) minmax(7rem, 0.35fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.accountMark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  color: var(--color-brand-strong);
+  background: var(--color-brand-soft);
+  font-size: var(--font-size-xs);
+  font-weight: 850;
+}
+
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.planPreview {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+}
+
+.planPreviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.planPreviewBody {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.planName,
+.planSponsor,
+.planBalance,
+.planLimit {
+  margin: 0;
+}
+
+.planName {
+  color: var(--color-heading);
+  font-size: var(--font-size-lg);
+}
+
+.planSponsor {
+  margin-block-start: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.planBalance {
+  margin-block-start: var(--space-2);
+  color: var(--color-heading);
+  font-size: var(--font-size-xl);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+}
+
+.planLimit {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+}
+
+.planPreview > a {
+  width: 100%;
+  margin-block-start: auto;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.75fr);
+  gap: var(--space-5);
+}
+
+.detailList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.detailList div {
+  min-width: 0;
+}
+
+.detailList dt {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.detailList dd {
+  margin: var(--space-2) 0 0;
+}
+
+.detailLoadingHeader {
+  display: grid;
+  gap: var(--space-3);
+  margin-block: var(--space-6) var(--space-7);
+}
+
+.capacityDetail {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.capacityDetail p,
+.capacityDetail small {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.capacityDetail p {
+  font-size: var(--font-size-sm);
+}
+
+.capacityDetail p strong {
+  color: var(--color-heading);
+}
+
+.capacityDetail small {
+  font-size: var(--font-size-xs);
+}
+
+.tableScroller {
+  overflow-x: auto;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.historyTable th,
+.historyTable td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.historyTable th {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.historyTable td:nth-child(2) {
+  width: 100%;
+  white-space: normal;
+}
+
+.historyTable th:last-child,
+.historyTable td:last-child {
+  color: var(--color-heading);
+  font-weight: 750;
+  text-align: right;
+}
+
+.historyTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.formCard {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-block-start: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.destinationCard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.destinationCard p,
+.destinationCard strong {
+  margin: 0;
+}
+
+.destinationCard p {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.destinationCard strong {
+  display: block;
+  margin-block-start: var(--space-2);
+  color: var(--color-heading);
+}
+
+.notFound {
+  display: grid;
+  min-height: 70vh;
+  place-items: center;
+  text-align: center;
+}
+
+.notFoundCode {
+  margin: 0;
+  color: var(--color-brand);
+  font-size: clamp(4.5rem, 18vw, 9rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.08em;
+  opacity: 0.14;
+}
+
+.notFound h1 {
+  margin: calc(var(--space-6) * -1) 0 var(--space-3);
+  font-size: var(--font-size-2xl);
+}
+
+.notFound p {
+  max-width: 32rem;
+  margin: 0 auto;
+  color: var(--color-text-muted);
+}
+
+.notFoundAction {
+  margin-block-start: var(--space-6);
+}
+
+.chooserShell {
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(31, 157, 119, 0.14), transparent 28rem),
+    linear-gradient(180deg, #fbfdfb 0%, var(--color-app-background) 100%);
+}
+
+.publicHeader {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(78rem, calc(100% - 3rem));
+  margin: 0 auto;
+  padding-block: var(--space-5);
+}
+
+.publicBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-heading);
+  font-size: var(--font-size-md);
+  font-weight: 820;
+  text-decoration: none;
+}
+
+.publicBrand:hover {
+  color: var(--color-heading);
+  text-decoration: none;
+}
+
+.publicBrandMark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  color: var(--color-on-brand);
+  background: var(--color-sidebar);
+  box-shadow: var(--shadow-button);
+}
+
+.publicHeaderNote {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  font-weight: 650;
+}
+
+.chooserMain {
+  position: relative;
+  z-index: 1;
+  width: min(78rem, calc(100% - 3rem));
+  margin: 0 auto;
+  padding: clamp(var(--space-7), 8vw, var(--space-11)) 0 var(--space-10);
+}
+
+.chooserHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(20rem, 0.75fr);
+  align-items: end;
+  gap: clamp(var(--space-7), 8vw, var(--space-11));
+}
+
+.heroEyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-brand);
+  font-size: var(--font-size-xs);
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.chooserHero h1 {
+  max-width: 15ch;
+  margin: 0;
+  color: var(--color-heading);
+  font-size: clamp(2.8rem, 7vw, 5.4rem);
+  font-weight: 840;
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+}
+
+.heroDescription {
+  max-width: 42rem;
+  margin: var(--space-6) 0 0;
+  color: var(--color-text-muted);
+  font-size: clamp(var(--font-size-md), 2vw, var(--font-size-lg));
+  line-height: 1.6;
+}
+
+.heroAside {
+  padding: var(--space-6);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--radius-xl);
+  background: rgba(238, 248, 243, 0.75);
+}
+
+.heroAsideLabel {
+  margin: 0;
+  color: var(--color-brand-strong);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heroAside p:last-child {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.chooserSection {
+  margin-block-start: clamp(var(--space-9), 10vw, var(--space-12));
+}
+
+.chooserSectionHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-block-end: var(--space-5);
+}
+
+.chooserSectionHeader h2,
+.chooserSectionHeader p {
+  margin: 0;
+}
+
+.chooserSectionHeader h2 {
+  color: var(--color-heading);
+  font-size: var(--font-size-xl);
+}
+
+.chooserSectionHeader p {
+  max-width: 34rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: right;
+}
+
+.participantGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.participantCard {
+  display: grid;
+  gap: var(--space-5);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.participantCard:hover {
+  border-color: var(--color-brand-border);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.participantIdentity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  color: var(--color-brand-strong);
+  background: var(--color-brand-soft);
+  font-size: var(--font-size-sm);
+  font-weight: 850;
+}
+
+.participantIdentity h3,
+.participantIdentity p {
+  margin: 0;
+}
+
+.participantLoadingText {
+  display: grid;
+  flex: 1;
+  gap: var(--space-2);
+}
+
+.participantIdentity h3 {
+  color: var(--color-heading);
+  font-size: var(--font-size-md);
+}
+
+.participantIdentity p {
+  margin-block-start: var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+}
+
+.participantCard > a {
+  width: 100%;
+}
+
+.publicFooter {
+  width: min(78rem, calc(100% - 3rem));
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 58rem) {
+  .statsGrid,
+  .participantGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .plansGrid,
+  .detailGrid,
+  .chooserHero {
+    grid-template-columns: 1fr;
+  }
+
+  .chooserHero {
+    align-items: start;
+  }
+
+  .heroAside {
+    max-width: 42rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .page {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .accountPreview,
+  .formGrid,
+  .detailList,
+  .destinationCard {
+    grid-template-columns: 1fr;
+  }
+
+  .accountMark {
+    display: none;
+  }
+
+  .formActions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .chooserSectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .chooserSectionHeader p {
+    text-align: left;
+  }
+
+  .publicHeaderNote {
+    display: none;
+  }
+}
