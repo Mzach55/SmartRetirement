@@ -1,6 +1,6 @@
 import { Card, Skeleton } from '../../components/ui/index.ts'
 import { formatCurrency } from '../../lib/formatters.ts'
-import styles from './Dashboard.module.css'
+import styles from '../../styles/Dashboard.module.css'
 
 interface BalanceSummaryProps {
   readonly activePlanCount: number

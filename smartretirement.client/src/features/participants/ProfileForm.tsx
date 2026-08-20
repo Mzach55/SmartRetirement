@@ -7,7 +7,7 @@ import {
   validateProfileForm,
 } from './profileForm.ts'
 import type { ProfileFormErrors, ProfileFormValues } from './profileForm.ts'
-import styles from './ProfileForm.module.css'
+import styles from '../../styles/ProfileForm.module.css'
 
 interface ProfileFormProps {
   readonly isPending: boolean

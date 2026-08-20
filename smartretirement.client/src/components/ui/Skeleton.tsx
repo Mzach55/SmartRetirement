@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { classNames } from '../../lib/classNames.ts'
-import styles from './ui.module.css'
+import styles from '../../styles/ui.module.css'
 
 interface SkeletonProps {
   readonly className?: string

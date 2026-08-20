@@ -7,7 +7,7 @@ import {
 } from '../../lib/formatters.ts'
 import type { Participant } from '../../types/api.ts'
 import { StatusBadge } from '../ui/index.ts'
-import styles from './AppShell.module.css'
+import styles from '../../styles/AppShell.module.css'
 
 type AppShellProps = PropsWithChildren<{
   readonly participant: Participant

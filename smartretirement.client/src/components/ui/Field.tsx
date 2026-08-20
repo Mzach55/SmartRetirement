@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import styles from './ui.module.css'
+import styles from '../../styles/ui.module.css'
 
 type FieldProps = PropsWithChildren<{
   readonly error?: string

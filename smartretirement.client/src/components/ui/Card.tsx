@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'react'
 import { classNames } from '../../lib/classNames.ts'
-import styles from './ui.module.css'
+import styles from '../../styles/ui.module.css'
 
 type CardPadding = 'none' | 'compact' | 'comfortable'
 type CardTone = 'default' | 'soft'

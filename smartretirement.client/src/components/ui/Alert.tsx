@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import { classNames } from '../../lib/classNames.ts'
-import styles from './ui.module.css'
+import styles from '../../styles/ui.module.css'
 
 type AlertTone = 'info' | 'success' | 'warning' | 'danger'
 

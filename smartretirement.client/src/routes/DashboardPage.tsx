@@ -14,9 +14,9 @@ import {
   sumPlanBalances,
 } from '../lib/financials.ts'
 import type { Plan } from '../types/api.ts'
-import dashboardStyles from '../features/dashboard/Dashboard.module.css'
+import dashboardStyles from '../styles/Dashboard.module.css'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 const NO_PLANS: readonly Plan[] = []
 

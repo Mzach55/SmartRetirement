@@ -32,7 +32,7 @@ import {
 import { parsePositiveRouteId } from '../lib/routeParams.ts'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
 import NotFoundPage from './NotFoundPage.tsx'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 function PlanDetailPage() {
   const participant = useCurrentParticipant()

@@ -28,7 +28,7 @@ import type {
   ContributionFormErrors,
   ContributionFormValues,
 } from './contributionForm.ts'
-import styles from './ContributionForm.module.css'
+import styles from '../../styles/ContributionForm.module.css'
 
 interface ContributionFormProps {
   readonly contributions: readonly Contribution[]

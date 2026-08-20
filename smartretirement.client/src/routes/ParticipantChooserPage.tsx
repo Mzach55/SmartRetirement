@@ -14,7 +14,7 @@ import {
   formatParticipantName,
 } from '../lib/formatters.ts'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 function ParticipantChooserPage() {
   useDocumentTitle('Choose a participant | RetireWise')

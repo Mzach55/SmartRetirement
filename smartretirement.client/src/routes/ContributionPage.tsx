@@ -21,7 +21,7 @@ import { parsePositiveRouteId } from '../lib/routeParams.ts'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
 import type { CreateContributionRequest } from '../types/api.ts'
 import NotFoundPage from './NotFoundPage.tsx'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 function ContributionPage() {
   const participant = useCurrentParticipant()

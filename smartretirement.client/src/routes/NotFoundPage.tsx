@@ -1,7 +1,7 @@
 import { useParams } from 'react-router'
 import { ActionLink } from '../components/ui/index.ts'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 interface NotFoundPageProps {
   readonly participantUnavailable?: boolean

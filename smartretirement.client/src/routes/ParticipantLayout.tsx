@@ -5,7 +5,7 @@ import { Alert, Button, Card, Skeleton } from '../components/ui/index.ts'
 import { useParticipantQuery } from '../features/participants/index.ts'
 import { parsePositiveRouteId } from '../lib/routeParams.ts'
 import NotFoundPage from './NotFoundPage.tsx'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 function ParticipantLayout() {
   const routeParams = useParams()

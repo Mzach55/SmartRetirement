@@ -13,7 +13,7 @@ import {
 import { formatUtcDateTime } from '../lib/formatters.ts'
 import { useDocumentTitle } from '../lib/useDocumentTitle.ts'
 import type { UpdateParticipantRequest } from '../types/api.ts'
-import styles from './Routes.module.css'
+import styles from '../styles/Routes.module.css'
 
 function ProfilePage() {
   useDocumentTitle('Profile | RetireWise')

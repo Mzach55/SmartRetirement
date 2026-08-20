@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
-import styles from './AppErrorBoundary.module.css'
+import styles from '../styles/AppErrorBoundary.module.css'
 
 interface AppErrorBoundaryProps {
   readonly children: ReactNode

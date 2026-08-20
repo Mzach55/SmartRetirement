@@ -18,7 +18,7 @@ import {
   formatPlanType,
 } from '../../lib/formatters.ts'
 import type { Contribution, Plan } from '../../types/api.ts'
-import styles from './Dashboard.module.css'
+import styles from '../../styles/Dashboard.module.css'
 
 interface PlanSummaryCardProps {
   readonly contributions: readonly Contribution[] | undefined

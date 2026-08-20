@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from 'react'
 import { Link } from 'react-router'
 import type { LinkProps } from 'react-router'
 import { classNames } from '../../lib/classNames.ts'
-import styles from './ui.module.css'
+import styles from '../../styles/ui.module.css'
 
 type ButtonVariant = 'primary' | 'secondary' | 'quiet'
 type ButtonSize = 'small' | 'medium'
