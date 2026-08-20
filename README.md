@@ -49,13 +49,6 @@ requests to `/api` are proxied to `http://localhost:5045`.
 The SQLite database persists at `SmartRetirement.Api/Retirewise.db`. To reset
 the demo data, stop the API, delete only that file, and restart the API.
 
-## Demo
-
-1. Choose Maya Chen.
-2. Review her 401(k), IRA, balances, and 2025 contribution history.
-3. Show an over-limit contribution rejection, then submit a valid amount.
-4. Update her profile and confirm the refreshed participant identity.
-
 ## Verify
 
 ```bash
