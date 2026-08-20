@@ -1,318 +1,93 @@
-# RetireWise Application Flow
+# RetireWise Workflows
 
-This document shows how the currently implemented backend layers collaborate.
-The models, EF Core configuration, repositories, DTOs, services, and dependency
-injection registrations exist today. Custom REST controllers are intentionally
-shown as the next boundary because they belong to Topic 5 and have not yet been
-implemented.
+This guide documents the boundaries and user-facing workflows that are easy to
+lose when reading individual files. Endpoint details live in the
+[API reference](../SmartRetirement.Api/README.md); persistence details live in
+the [database schema](database-schema.md).
 
-## Layered architecture
-
-```mermaid
-flowchart LR
-    Client["RetireWise client or API caller"]
-    Pipeline["ASP.NET Core request pipeline"]
-    Controllers["REST controllers<br/>Topic 5: not implemented yet"]
-
-    subgraph Application["Application layer"]
-        ServiceInterfaces["Service interfaces"]
-        Services["ParticipantService<br/>PlanService<br/>ContributionService"]
-        DTOs["Request and response DTOs<br/>ServiceResult and ServiceError"]
-    end
-
-    subgraph Persistence["Persistence layer"]
-        RepositoryInterfaces["Repository interfaces"]
-        Repositories["Generic and entity-specific repositories"]
-        Context["AppDbContext<br/>EF Core change tracker"]
-        SQLite[("SQLite database")]
-    end
-
-    Client --> Pipeline
-    Pipeline -. "will dispatch to" .-> Controllers
-    Controllers -. "will depend only on" .-> ServiceInterfaces
-    ServiceInterfaces --> Services
-    Services --> DTOs
-    Services --> RepositoryInterfaces
-    RepositoryInterfaces --> Repositories
-    Repositories --> Context
-    Context --> SQLite
-```
-
-The arrows represent allowed dependencies. Controllers should not skip the
-service layer to call repositories or `AppDbContext`. Repositories should not
-contain annual-limit rules or HTTP behavior.
-
-## Service dependency graph
-
-```mermaid
-flowchart TB
-    subgraph ServiceLayer["Service layer"]
-        ParticipantService
-        PlanService
-        ContributionService
-    end
-
-    subgraph Contracts["Repository contracts"]
-        IParticipantRepository
-        IEmployerRepository
-        IPlanRepository
-        IContributionRepository
-        Generic["IRepository&lt;T&gt;"]
-    end
-
-    ParticipantService --> IParticipantRepository
-
-    PlanService --> IPlanRepository
-    PlanService --> IParticipantRepository
-    PlanService --> IEmployerRepository
-
-    ContributionService --> IContributionRepository
-    ContributionService --> IPlanRepository
-
-    IParticipantRepository -- "inherits" --> Generic
-    IEmployerRepository -- "inherits" --> Generic
-    IPlanRepository -- "inherits" --> Generic
-    IContributionRepository -- "inherits" --> Generic
-```
-
-Each service receives interfaces through constructor injection. This keeps the
-service unaware of EF Core implementation details and allows a different
-implementation or test double to satisfy the same contract.
-
-## Dependency injection and scoped lifetime
-
-```mermaid
-flowchart TB
-    Program["Program.cs registrations"]
-
-    subgraph Scope["One HTTP request / one DI scope"]
-        Controller["Future controller instance"]
-        Service["Scoped service instance"]
-        RepoA["Scoped repository A"]
-        RepoB["Scoped repository B"]
-        DbContext["One shared scoped AppDbContext"]
-        Tracker["Shared EF Core change tracker"]
-    end
-
-    Program --> Controller
-    Controller --> Service
-    Service --> RepoA
-    Service --> RepoB
-    RepoA --> DbContext
-    RepoB --> DbContext
-    DbContext --> Tracker
-```
-
-The shared scoped context is important for `ContributionService`. The plan
-repository can track a balance change while the contribution repository tracks
-a new contribution. A single `SaveChangesAsync` commits both pending changes.
-
-## Generic and specific repository flow
+## Boundaries
 
 ```mermaid
 flowchart LR
-    Service["Service use case"]
-
-    subgraph Specific["Specific repository"]
-        Query["Domain-specific query<br/>for example annual total"]
-    end
-
-    subgraph Generic["Repository&lt;T&gt;"]
-        Common["GetById / GetAll<br/>Add / Update / Remove<br/>SaveChanges"]
-        DbSet["protected DbSet&lt;T&gt; _dbSet"]
-        Context["protected AppDbContext _context"]
-    end
-
-    Database[(SQLite)]
-
-    Service --> Query
-    Service --> Common
-    Query --> DbSet
-    Common --> DbSet
-    Common --> Context
-    DbSet --> Context
-    Context --> Database
+    Browser["React route"] --> Query["query or mutation"]
+    Query --> HTTP["typed HTTP client<br/>runtime parser"]
+    HTTP --> Controller["ASP.NET controller"]
+    Controller --> Service["service<br/>validation and business rules"]
+    Service --> Repository["repository<br/>EF queries and state"]
+    Repository --> Context["scoped AppDbContext"]
+    Context --> SQLite[("SQLite")]
 ```
 
-`protected` allows derived repositories to reuse `_dbSet` and `_context`
-without making those fields public to unrelated callers. The generic repository
-handles operations shared by every entity. Specific repositories add queries
-that only make sense for one entity, such as summing contributions by plan and
-tax year.
+| Boundary | Responsibility |
+| --- | --- |
+| Route and form | URL parsing, local drafts, presentation, accessible feedback |
+| Query and HTTP client | Server-state caching, cancellation, JSON validation |
+| Controller | Routing, success status, Problem Details translation |
+| Service | Validation, authorization-independent use cases, DTO mapping, business rules |
+| Repository and EF Core | Queries, relationships, tracked changes, persistence |
 
-## Query behavior and tracking
+The API is authoritative. Client calculations improve feedback but never replace
+server validation.
 
-```mermaid
-flowchart TD
-    Query{What kind of operation?}
-    ById["GetByIdAsync / FindAsync"]
-    ReadOnly["Read-only list or detail query"]
-    Mutation["Add, Update, or Remove"]
+## Participant read
 
-    Tracked["Tracked entity<br/>changes can be detected"]
-    Untracked["AsNoTracking result<br/>lower tracking overhead"]
-    Pending["Entity state changed in memory<br/>not persisted yet"]
-    Save["SaveChangesAsync"]
-    Database[(SQLite)]
+1. The client validates the participant ID before sending a request.
+2. `ParticipantLayout` verifies the participant and renders the shared shell.
+3. Nested pages query plans and, where needed, contribution histories.
+4. Runtime parsers validate successful JSON before TanStack Query caches it.
+5. Pure selectors derive combined balances, annual totals, and remaining
+   capacity without modifying cached data.
+6. Plan pages reject a valid plan ID when it does not belong to the participant
+   identified by the route.
 
-    Query -->|single identity lookup| ById
-    Query -->|display/query only| ReadOnly
-    Query -->|state change| Mutation
-    ById --> Tracked
-    ReadOnly --> Untracked
-    Mutation --> Pending
-    Tracked --> Pending
-    Pending --> Save
-    Save --> Database
-```
+Contribution-history requests can fail independently; plan balances remain
+visible while the affected history exposes a retry action.
 
-`AddAsync`, `Update`, and `Remove` change EF Core's tracked state. They do not
-guarantee persistence until `SaveChangesAsync` succeeds.
-
-## Contribution creation and annual-limit rule
+## Contribution write
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor Caller
-    participant Service as ContributionService
-    participant PlanRepo as IPlanRepository
-    participant ContributionRepo as IContributionRepository
-    participant Context as Shared AppDbContext
-    participant DB as SQLite
+    actor User
+    participant Form as Contribution form
+    participant Client as Client mutation
+    participant API as Controller and service
+    participant DB as EF Core and SQLite
+    participant Cache as Query cache
 
-    Caller->>Service: CreateAsync(request, cancellationToken)
-    Service->>Service: Validate ID, amount, date, and tax year
-    Service->>PlanRepo: GetByIdAsync(planId)
-    PlanRepo->>Context: FindAsync(planId)
-    Context->>DB: Query when not already tracked
-    DB-->>Context: Plan or no row
-    Context-->>PlanRepo: Plan or null
-    PlanRepo-->>Service: Plan or null
-
-    alt Plan missing or inactive
-        Service-->>Caller: Failed ServiceResult
-    else Plan can accept contributions
-        Service->>ContributionRepo: GetTotalForPlanAndTaxYearAsync(planId, taxYear)
-        ContributionRepo->>DB: SUM amount for matching plan and year
-        DB-->>ContributionRepo: Existing annual total
-        ContributionRepo-->>Service: Existing annual total
-        Service->>Service: projectedTotal = existingTotal + requestedAmount
-
-        alt Projected total exceeds limit
-            Service-->>Caller: AnnualLimitExceeded result
-        else Projected total is within limit
-            Service->>ContributionRepo: AddAsync(new contribution)
-            Service->>PlanRepo: Update(plan with increased balance)
-            Service->>ContributionRepo: SaveChangesAsync()
-            ContributionRepo->>Context: Commit all tracked changes once
-            Context->>DB: INSERT contribution and UPDATE plan
-            DB-->>Context: Commit succeeds
-            Service-->>Caller: Successful ContributionResponse
-        end
+    User->>Form: Enter amount, date, tax year, description
+    Form->>Form: Validate shape and show advisory capacity
+    Form->>Client: Submit typed request
+    Client->>API: POST contribution
+    API->>API: Validate plan, status, and annual total
+    alt Rejected
+        API-->>Client: Problem Details
+        Client-->>Form: Preserve draft and show correction
+    else Accepted
+        API->>DB: Insert contribution and update balance in one save
+        DB-->>API: Commit
+        API-->>Client: 201 contribution
+        Client->>Cache: Refresh history, plan, and participant plans
+        Client-->>User: Replace form route with plan detail
     end
 ```
 
-The rule compares the projected total with the stored plan limit:
+The annual total is scoped to one plan and tax year. Equality with the limit is
+accepted; only a projected total above the limit is rejected.
 
-```text
-existing total + requested amount > annual limit  => reject
-existing total + requested amount == annual limit => accept
-existing total + requested amount < annual limit  => accept
-```
+## Profile write
 
-Only contributions for the same plan and tax year are included. A rejected
-request never calls `AddAsync` or `SaveChangesAsync`.
+The form validates names, email, and date of birth, then sends only editable
+fields. The service normalizes the email and enforces uniqueness while
+preserving the participant ID and creation timestamp. On success, the client
+replaces participant detail in the cache and refreshes the chooser. Any failure
+preserves the draft.
 
-## Plan-service decision flow
+## Failure ownership
 
-```mermaid
-flowchart TD
-    Request["Plan service request"] --> Validate["Validate IDs, name, type,<br/>opened date, and annual limit"]
-    Validate -->|invalid| ValidationFailure["Validation failure"]
-    Validate -->|valid| Operation{Operation}
-
-    Operation -->|Create| ParticipantExists{"Participant exists?"}
-    ParticipantExists -->|no| NotFound["NotFound failure"]
-    ParticipantExists -->|yes| EmployerNeeded{"EmployerId supplied?"}
-    EmployerNeeded -->|yes| EmployerExists{"Employer exists?"}
-    EmployerExists -->|no| NotFound
-    EmployerExists -->|yes| NewPlan["Create active plan<br/>with zero balance"]
-    EmployerNeeded -->|no| NewPlan
-
-    Operation -->|Update| PlanExists{"Plan exists?"}
-    PlanExists -->|no| NotFound
-    PlanExists -->|yes| UpdateFields["Update allowed metadata<br/>not owner or balance"]
-
-    Operation -->|Delete| Details["Load plan with contributions"]
-    Details --> HasHistory{"Has contribution history?"}
-    HasHistory -->|yes| Conflict["Conflict: deactivate instead"]
-    HasHistory -->|no| Remove["Remove and save"]
-
-    NewPlan --> Save["SaveChangesAsync"]
-    UpdateFields --> Save
-```
-
-The nullable employer ID permits an individual account. Participant ownership
-and current balance are intentionally absent from the update DTO so an ordinary
-metadata update cannot transfer an account or rewrite financial state.
-
-## Participant-service decision flow
-
-```mermaid
-flowchart TD
-    Input["Create or update request"] --> Validate["Validate names, email syntax,<br/>lengths, and date of birth"]
-    Validate -->|invalid| Failure["Validation failure"]
-    Validate -->|valid| Normalize["Trim names and normalize email"]
-    Normalize --> Unique{"Email already used by<br/>another participant?"}
-    Unique -->|yes| Conflict["Conflict failure"]
-    Unique -->|no| Mode{Create or update?}
-    Mode -->|Create| Create["Set CreatedAtUtc on server"]
-    Mode -->|Update| Update["Preserve Id and CreatedAtUtc"]
-    Create --> Save["SaveChangesAsync"]
-    Update --> Save
-
-    Delete["Delete request"] --> LoadPlans["Load participant with plans"]
-    LoadPlans --> OwnsPlans{"Owns any plans?"}
-    OwnsPlans -->|yes| DeleteConflict["Conflict: deletion rejected"]
-    OwnsPlans -->|no| DeleteSave["Remove and save"]
-```
-
-The pre-save email check provides a useful business error. The database's
-unique index remains the final protection against duplicate values.
-
-## Service result states
-
-```mermaid
-stateDiagram-v2
-    [*] --> ServiceOperation
-    ServiceOperation --> Success: use case completed
-    ServiceOperation --> Failure: expected validation or domain problem
-
-    Success: IsSuccess = true
-    Success: Value is populated
-    Success: Error is null
-
-    Failure: IsSuccess = false
-    Failure: Value is null/default
-    Failure: Error has code and message
-
-    Success --> [*]
-    Failure --> [*]
-```
-
-The private `ServiceResult<T>` constructor and public static factory methods
-prevent callers from freely constructing contradictory result states. Topic 5
-controllers will translate these error codes into HTTP status codes.
-
-## Current boundary and known limitation
-
-The service and persistence layers are registered and compile, but custom
-controllers are not implemented yet. Therefore the current architecture is
-ready to receive HTTP endpoints, but the client cannot yet invoke these use
-cases through REST.
-
-The annual-limit check is also a read-then-write operation. Two concurrent
-requests could read the same existing total and both pass before either saves.
-A production implementation would study transaction isolation, optimistic
-concurrency, or a database-enforced aggregate strategy.
+| Failure | Handling |
+| --- | --- |
+| Invalid route or form value | Client blocks the request and identifies the field or route |
+| Expected service failure | API returns structured `400`, `404`, or `409` Problem Details |
+| Network failure | Client preserves useful state and offers retry where safe |
+| Invalid success JSON | Runtime parser rejects the response as a contract error |
+| Unexpected exception or render failure | Server middleware or client error boundary provides generic recovery |

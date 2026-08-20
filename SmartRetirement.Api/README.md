@@ -1,108 +1,78 @@
 # RetireWise API
 
-The RetireWise API owns the participant, employer, plan, and contribution data
-used by the React portal. It uses ASP.NET Core controllers, Entity Framework
-Core, and SQLite.
+The API is the authoritative boundary for participant, plan, employer, and
+contribution data. It runs at `http://localhost:5045` with the local HTTP
+profile; development OpenAPI JSON is available at
+`http://localhost:5045/openapi/v1.json`.
 
-See the [root README](../README.md) for the product overview and complete
-full-stack setup.
+See the [root README](../README.md) for startup instructions.
 
-## Design
+## Endpoints
 
-```text
-Controller → Service → Repository → AppDbContext → SQLite
-```
+| Method | Path | Success |
+| --- | --- | --- |
+| `GET` | `/api/participants` | `200` participant array |
+| `GET` | `/api/participants/{participantId}` | `200` participant |
+| `POST` | `/api/participants` | `201` participant |
+| `PUT` | `/api/participants/{participantId}` | `200` participant |
+| `DELETE` | `/api/participants/{participantId}` | `204` |
+| `GET` | `/api/plans` | `200` plan array |
+| `GET` | `/api/plans/{planId}` | `200` plan |
+| `GET` | `/api/participants/{participantId}/plans` | `200` plan array |
+| `GET` | `/api/employers/{employerId}/plans` | `200` plan array |
+| `POST` | `/api/plans` | `201` plan |
+| `PUT` | `/api/plans/{planId}` | `200` plan |
+| `DELETE` | `/api/plans/{planId}` | `204` |
+| `GET` | `/api/contributions/{contributionId}` | `200` contribution |
+| `GET` | `/api/plans/{planId}/contributions` | `200` contribution array |
+| `POST` | `/api/contributions` | `201` contribution |
 
-- Controllers handle routing, status codes, and HTTP response translation.
-- Services validate requests, enforce business rules, and map DTOs.
-- Repositories contain EF Core queries and persistence operations.
-- Fluent API configurations define relationships, indexes, precision, and
-  delete behavior.
+There is no employer CRUD endpoint. Contributions are append-only through the
+HTTP API.
 
-A participant can own multiple plans. A plan belongs to one participant, may
-optionally reference an employer, and has many contributions.
+## Contracts
 
-## Run the API
+JSON uses camelCase. Calendar dates use `YYYY-MM-DD`, and monetary values are
+JSON numbers.
 
-From the repository root:
-
-```bash
-dotnet restore SmartRetirement.slnx
-dotnet build SmartRetirement.slnx
-dotnet run --project SmartRetirement.Api --launch-profile http
-```
-
-Development endpoints:
-
-- API: `http://localhost:5045`
-- OpenAPI JSON: `http://localhost:5045/openapi/v1.json`
-- Optional HTTPS profile: `https://localhost:7046`
-
-Development startup applies pending migrations and inserts missing sample data.
-
-## Route groups
-
-| Resource | Routes |
+| Request | Fields |
 | --- | --- |
-| Participants | `/api/participants`, `/api/participants/{participantId}` |
-| Plans | `/api/plans`, `/api/plans/{planId}` |
-| Participant plans | `/api/participants/{participantId}/plans` |
-| Employer plans | `/api/employers/{employerId}/plans` |
-| Contributions | `/api/contributions`, `/api/contributions/{contributionId}` |
-| Plan contributions | `/api/plans/{planId}/contributions` |
+| Participant create/update | `firstName`, `lastName`, `email`, `dateOfBirth` |
+| Plan create | `participantId`, nullable `employerId`, `name`, `type`, `openedOn`, `annualContributionLimit` |
+| Plan update | nullable `employerId`, `name`, `type`, `openedOn`, `annualContributionLimit`, `isActive` |
+| Contribution create | `planId`, `amount`, `contributionDate`, `taxYear`, nullable `description` |
 
-Participants and plans support the appropriate GET, POST, PUT, and DELETE
-operations. Contributions are append-only in the current participant workflow.
+Responses add server-owned identifiers and state. Participant responses include
+`createdAtUtc`; plan responses include `currentBalance`, `isActive`, and an
+optional employer summary.
 
-## Contribution-limit rule
+Plan types are numeric: `1` = 401(k), `2` = IRA, `3` = HSA, `4` = 529,
+and `5` = ABLE. `0` is reserved and rejected.
 
-When creating a contribution, `ContributionService`:
+## Errors
 
-1. validates the request and destination plan;
-2. rejects inactive plans;
-3. totals contributions for the same plan and tax year;
-4. rejects a projected total above the plan's annual limit;
-5. otherwise inserts the contribution and updates the plan balance in one save.
+Expected failures use Problem Details with a stable `code` extension:
 
-An excessive request returns `409 Conflict` with the Problem Details code
-`AnnualLimitExceeded`.
+| Status | Codes |
+| --- | --- |
+| `400` | `Validation` |
+| `404` | `NotFound` |
+| `409` | `Conflict`, `PlanInactive`, `AnnualLimitExceeded` |
 
-Other expected service codes are `Validation`, `NotFound`, `Conflict`, and
-`PlanInactive`. Clients should use these codes instead of parsing error text.
+Clients should branch on `status` and `code`, not human-readable
+`title` or `detail`.
 
-## Database and migrations
+## Contribution rule
 
-The development database is `SmartRetirement.Api/Retirewise.db`. Seed changes
-and successful contribution/profile updates persist between restarts.
-
-To restore the original seed, stop the API and remove only that file. The next
-Development startup recreates and reseeds it. This discards local demo changes.
-
-Useful migration commands:
-
-```bash
-dotnet ef migrations list --project SmartRetirement.Api
-dotnet ef migrations add DescriptiveName --project SmartRetirement.Api
-dotnet ef database update --project SmartRetirement.Api
-```
-
-Review generated `Up`, `Down`, and model-snapshot changes before committing a
-migration.
-
-## Project structure
+A contribution is accepted only when the plan exists, is active, and:
 
 ```text
-Configurations/     EF Core Fluent API mappings
-Controllers/        HTTP endpoints
-Data/               AppDbContext and development seeder
-DTOs/               Request and response contracts
-Migrations/         Versioned database schema
-Models/             Persistence entities
-Repositories/       Data-access abstractions and implementations
-Services/           Validation and business logic
-Program.cs          Dependency injection and request pipeline
+existing total for plan and tax year + requested amount <= annual limit
 ```
 
-For complete diagrams, relationship details, and request flows, see
-[application-flow.md](../docs/application-flow.md) and
-[database-schema.md](../docs/database-schema.md).
+On success, the contribution insert and plan-balance update are persisted by
+one `SaveChangesAsync`. The account balance is not used to calculate annual
+contribution capacity.
+
+See [Workflows](../docs/application-flow.md) for request sequences and
+[Database Schema](../docs/database-schema.md) for persistence details.

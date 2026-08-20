@@ -1,10 +1,8 @@
 # RetireWise Database Schema
 
-This diagram reflects the current EF Core entity model and Fluent API
-configuration in `SmartRetirement.Api`.
+The EF Core model contains four SQLite tables.
 
-For request flow, dependency injection, repository behavior, and service
-business rules, see [Application Flow](application-flow.md).
+## Relationships and columns
 
 ```mermaid
 erDiagram
@@ -16,7 +14,7 @@ erDiagram
         int Id PK
         string FirstName
         string LastName
-        string Email UK "unique"
+        string Email UK
         date DateOfBirth
         datetime CreatedAtUtc
     }
@@ -24,61 +22,87 @@ erDiagram
     EMPLOYER {
         int Id PK
         string Name
-        string Industry "nullable"
+        string Industry nullable
     }
 
     PLAN {
         int Id PK
         int ParticipantId FK
-        int EmployerId FK "nullable"
+        int EmployerId FK nullable
         string Name
-        string Type "PlanType enum stored as text"
+        string Type
         date OpenedOn
-        decimal CurrentBalance "precision 18,2"
-        decimal AnnualContributionLimit "precision 18,2"
+        decimal CurrentBalance
+        decimal AnnualContributionLimit
         bool IsActive
     }
 
     CONTRIBUTION {
         int Id PK
         int PlanId FK
-        decimal Amount "precision 18,2"
+        decimal Amount
         date ContributionDate
         int TaxYear
-        string Description "nullable, max 500"
+        string Description nullable
     }
 ```
 
-## Relationship interpretation
+A plan is a participant-owned account, not a shared employer offering.
+Employer sponsorship is optional per plan; every contribution belongs to one
+plan.
 
-- A participant can own zero or many plans; every plan has exactly one
-  participant.
-- An employer can sponsor zero or many plans; a plan may have zero or one
-  employer so individual accounts remain valid.
-- A plan can receive zero or many contributions; every contribution belongs to
-  exactly one plan.
+## Constraints
 
-## Delete behavior
+| Area | Rule |
+| --- | --- |
+| Participant | Names are required and limited to 100 characters; email is required, limited to 256, and unique |
+| Employer | Name is required and limited to 200 characters; industry is optional and limited to 100 |
+| Plan | Name is required and limited to 200; type is stored as text; monetary fields use precision `18,2` |
+| Contribution | Amount uses precision `18,2`; description is optional and limited to 500 characters |
+| Participant deletion | Restricted while owned plans exist |
+| Employer deletion | Sets `Plan.EmployerId` to null |
+| Plan deletion | Restricted while contributions exist |
 
-| Principal | Dependent | Behavior | Result |
-| --- | --- | --- | --- |
-| Participant | Plan | `Restrict` | A participant cannot be deleted while plans reference them. |
-| Employer | Plan | `SetNull` | Deleting an employer preserves its plans and clears their `EmployerId`. |
-| Plan | Contribution | `Restrict` | A plan cannot be deleted while contribution history references it. |
+Service validation enforces positive monetary values and identifiers, valid
+dates, valid plan types, inactive-plan behavior, and annual limits before
+persistence.
 
-## Constraints and indexes
+## Indexes
 
-- `Participant.Email` has a unique index.
-- `Contribution` has a composite index on `(PlanId, TaxYear)` to support annual
-  contribution-limit calculations.
-- Required names have configured maximum lengths; `Industry` and `Description`
-  are optional.
-- `Plan.Type` is stored as text using the values `Unknown`, `K401`, `IRA`,
-  `HSA`, `Education529`, and `Able`.
+| Index | Purpose |
+| --- | --- |
+| Unique `Participants.Email` | Final email-uniqueness safeguard |
+| `Plans.ParticipantId` | Participant plan lookup |
+| `Plans.EmployerId` | Employer plan lookup |
+| `Contributions(PlanId, TaxYear)` | Annual contribution total |
 
-## Important modeling note
+## Plan types
 
-`Plan` represents a participant-owned account, not a shared employer plan
-offering. If the domain later needs shared offerings with multiple enrolled
-participants, introduce a separate enrollment entity rather than changing this
-relationship into an implicit many-to-many association.
+The database stores enum names rather than numeric values:
+
+| Name | API value |
+| --- | ---: |
+| `K401` | 1 |
+| `IRA` | 2 |
+| `HSA` | 3 |
+| `Education529` | 4 |
+| `Able` | 5 |
+
+`Unknown` (0) is a rejected sentinel. Renaming an enum member requires a data
+migration.
+
+## Migrations
+
+The development database is `SmartRetirement.Api/Retirewise.db`. Development
+startup applies pending migrations and inserts missing demo data. Other
+environments must apply migrations separately.
+
+```bash
+dotnet ef migrations list --project SmartRetirement.Api
+dotnet ef migrations add DescriptiveName --project SmartRetirement.Api
+dotnet ef database update --project SmartRetirement.Api
+```
+
+Review generated migration and snapshot changes before committing them. SQLite
+stores `DateOnly`, `DateTime`, and decimal values as `TEXT`, and booleans as
+`INTEGER`; EF configuration carries the intended relational constraints.
