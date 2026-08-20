@@ -22,13 +22,13 @@ erDiagram
     EMPLOYER {
         int Id PK
         string Name
-        string Industry nullable
+        string Industry "nullable"
     }
 
     PLAN {
         int Id PK
         int ParticipantId FK
-        int EmployerId FK nullable
+        int EmployerId FK "nullable"
         string Name
         string Type
         date OpenedOn
@@ -43,7 +43,7 @@ erDiagram
         decimal Amount
         date ContributionDate
         int TaxYear
-        string Description nullable
+        string Description "nullable"
     }
 ```
 
