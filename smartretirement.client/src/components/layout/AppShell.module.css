@@ -1,0 +1,333 @@
+.shell {
+  min-height: 100vh;
+  background: var(--color-app-background);
+}
+
+.skipLink {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 100;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-on-brand);
+  background: var(--color-brand-strong);
+  font-weight: 750;
+  transform: translateY(-160%);
+  transition: transform var(--transition-fast);
+}
+
+.skipLink:focus {
+  color: var(--color-on-brand);
+  transform: translateY(0);
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  padding: var(--space-6) var(--space-5);
+  color: var(--color-sidebar-text);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(97, 196, 159, 0.13), transparent 28%),
+    var(--color-sidebar);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-on-brand);
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--color-on-brand);
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0.8rem;
+  color: var(--color-sidebar);
+  background: var(--color-accent-soft);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.brand small {
+  margin-block-start: 0.1rem;
+  color: var(--color-sidebar-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.environment {
+  margin-block: var(--space-8) var(--space-7);
+  padding: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.environment p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-sidebar-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.55;
+}
+
+.navigationLabel {
+  margin: 0 0 var(--space-3);
+  padding-inline: var(--space-3);
+  color: var(--color-sidebar-muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.navigation ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.85rem;
+  padding: 0.65rem var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-sidebar-text);
+  font-size: var(--font-size-sm);
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.navLink:hover {
+  color: var(--color-on-brand);
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+}
+
+.navLinkActive,
+.navLinkActive:hover {
+  color: var(--color-on-brand);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.navMarker {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 0.55rem;
+  color: var(--color-sidebar-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.navLinkActive .navMarker {
+  color: var(--color-sidebar);
+  background: var(--color-accent-soft);
+  border-color: transparent;
+}
+
+.sidebarFooter {
+  margin-block-start: auto;
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebarFooter p,
+.sidebarFooter strong,
+.sidebarFooter a {
+  display: block;
+}
+
+.sidebarParticipant {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sidebarAvatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: var(--color-sidebar);
+  background: var(--color-accent-soft);
+  font-size: var(--font-size-xs);
+  font-weight: 850;
+}
+
+.sidebarFooter p {
+  margin: 0;
+  color: var(--color-sidebar-muted);
+  font-size: var(--font-size-xs);
+}
+
+.sidebarFooter strong {
+  margin-block-start: var(--space-1);
+  color: var(--color-on-brand);
+  font-size: var(--font-size-sm);
+}
+
+.sidebarFooter a {
+  margin-block-start: var(--space-3);
+  color: var(--color-accent-soft);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.workspace {
+  min-height: 100vh;
+  margin-inline-start: var(--sidebar-width);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  min-height: var(--topbar-height);
+  padding: var(--space-3) clamp(var(--space-5), 5vw, var(--space-9));
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.topbar p,
+.topbar strong {
+  display: block;
+  margin: 0;
+}
+
+.topbar p {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+}
+
+.topbar strong {
+  margin-block-start: 0.15rem;
+  color: var(--color-heading);
+  font-size: var(--font-size-sm);
+}
+
+.switchLink {
+  color: var(--color-brand-strong);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+@media (max-width: 58rem) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .environment,
+  .sidebarFooter,
+  .navigationLabel {
+    display: none;
+  }
+
+  .sidebar,
+  .navigation ul {
+    align-items: center;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    gap: var(--space-6);
+  }
+
+  .navigation {
+    margin-inline-start: auto;
+  }
+
+  .navigation ul {
+    display: flex;
+  }
+
+  .navLink {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .navMarker {
+    display: none;
+  }
+
+  .workspace {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .sidebar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+  }
+
+  .navigation {
+    width: 100%;
+    margin: 0;
+  }
+
+  .navigation ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .navLink {
+    justify-content: center;
+  }
+
+  .topbar {
+    min-height: auto;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .topbar > div {
+    display: none;
+  }
+
+  .switchLink {
+    margin-inline-start: auto;
+  }
+}
